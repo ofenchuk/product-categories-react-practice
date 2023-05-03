@@ -19,22 +19,31 @@ const productsList = productsFromServer.map((product) => {
 export const App = () => {
   const [user, setUser] = useState(0);
   const [products, setProducts] = useState(productsList);
+  const [query, setQuery] = useState('');
 
-  useEffect(() => {
-    if (user === 0) {
-      setProducts(productsList);
+  const filter = () => {
+    let filteredProducts = productsList;
 
-      return;
+    if (user !== 0) {
+      filteredProducts = productsList.filter(
+        product => product.user.id === user,
+      );
     }
 
-    const filteredProducts = productsList.filter(
-      product => product.user.id === user,
-    );
+    const filtered = filteredProducts.filter(product => (
+      product.name.toLowerCase().includes(query.toLowerCase())
+    ));
 
-    console.log(products);
+    setProducts(filtered);
+  };
 
-    setProducts(filteredProducts);
-  }, [user]);
+  useEffect(() => {
+    filter();
+  }, [user, query]);
+
+  const handleInputChange = (event) => {
+    setQuery(event.target.value);
+  };
 
   return (
     <div className="section">
@@ -46,7 +55,12 @@ export const App = () => {
             <p className="panel-heading">Filters</p>
 
             <p className="panel-tabs has-text-weight-bold">
-              <a data-cy="FilterAllUsers" onClick={() => setUser(0)} href="#/">
+              <a
+                data-cy="FilterAllUsers"
+                onClick={() => setUser(0)}
+                className={classNames(user === 0 && 'is-active')}
+                href="#/"
+              >
                 All
               </a>
 
@@ -70,7 +84,8 @@ export const App = () => {
                   type="text"
                   className="input"
                   placeholder="Search"
-                  value="qwe"
+                  value={query}
+                  onChange={handleInputChange}
                 />
 
                 <span className="icon is-left">
@@ -79,11 +94,14 @@ export const App = () => {
 
                 <span className="icon is-right">
                   {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
-                  <button
-                    data-cy="ClearButton"
-                    type="button"
-                    className="delete"
-                  />
+                  {query.length > 0 && (
+                    <button
+                      data-cy="ClearButton"
+                      type="button"
+                      onClick={() => setQuery('')}
+                      className="delete"
+                    />
+                  )}
                 </span>
               </p>
             </div>
